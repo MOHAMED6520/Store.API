@@ -1,9 +1,19 @@
 
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Store.API.Domain.Contracts;
+using Store.API.Persistence;
+using Store.API.Persistence.Data.Contexts;
+using Store.API.Services;
+using Store.API.Services.Abstractions;
+using Store.API.Services.Mapping;
+using System.Threading.Tasks;
+
 namespace Store.API.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +24,15 @@ namespace Store.API.Web
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<StoreDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddAutoMapper(p => p.AddProfile(new ProductProfile()));
+            builder.Services.AddScoped<IServiceManger, ServiceManger>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,6 +41,16 @@ namespace Store.API.Web
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            #region Initialize Db
+
+            var Scope = app.Services.CreateScope();
+
+            var dbInitializer = Scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+
+            await dbInitializer.IntializeAsync();
+
+            #endregion
+
 
             app.UseHttpsRedirection();
 
