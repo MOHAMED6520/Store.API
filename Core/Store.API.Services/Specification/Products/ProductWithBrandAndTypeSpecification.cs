@@ -1,0 +1,67 @@
+﻿using Store.API.Domain.Contracts;
+using Store.API.Domain.Entities.Products;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Store.API.Services.Specification.Products
+{
+    public class ProductWithBrandAndTypeSpecification :BaseSpecification<int,Product>
+    {
+        public ProductWithBrandAndTypeSpecification(int?brandId,int? TypeId,string?Sort,string?Search):base
+            (
+            p =>
+                 (
+                 (!brandId.HasValue || p.BrandId == brandId)
+                  &&   
+                 (!TypeId.HasValue || p.TypeId==TypeId)
+                 )
+                 &&
+                 (
+                  (string.IsNullOrEmpty(Search)||p.Name.ToLower().Contains(Search.ToLower()))
+                 )
+                
+                  
+                 
+             )
+            
+        {
+            ApplyIncludes();
+
+            if (!string.IsNullOrEmpty(Sort))
+            {
+                switch (Sort.ToLower())
+                {
+                    case "priceasc":
+                        AddOrderBy(P => P.Price);
+                        break;
+                    case "pricedesc":
+                        AddOrderByDescending(P => P.Price);
+                        break;
+                    default:
+                        AddOrderBy(P => P.Name);
+                        break;
+                }
+            }
+            else
+            {
+                AddOrderBy(P => P.Name);
+            }
+        }
+
+        public ProductWithBrandAndTypeSpecification(int id) : base(p=>p.Id==id)
+        {
+            ApplyIncludes();
+        }
+
+        private void ApplyIncludes()
+        {
+            Includes.Add(p => p.Brand);
+            Includes.Add(p => p.Type);
+        }
+
+    }
+}
