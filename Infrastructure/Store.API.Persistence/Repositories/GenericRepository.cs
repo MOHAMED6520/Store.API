@@ -21,6 +21,7 @@ namespace Store.API.Persistence.Repositories
                 return changeTracker ?
                      await _context.Products.Include(P => P.Brand).Include(P => P.Type).ToListAsync() as IEnumerable<TEntity> :
                    await _context.Products.Include(P => P.Brand).Include(P => P.Type).AsNoTracking().ToListAsync() as IEnumerable<TEntity>;
+                
             }
             else
             {
@@ -52,6 +53,20 @@ namespace Store.API.Persistence.Repositories
         public void Delete(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<Tkey, TEntity> spec, bool changeTracker = false)
+        {
+           return await ApplySpecifications(spec).ToListAsync();
+        }
+
+        public async Task<TEntity?> GetAsync(ISpecification<Tkey, TEntity> spec)
+        {
+          return await ApplySpecifications(spec).FirstOrDefaultAsync();
+        }
+        private  IQueryable<TEntity> ApplySpecifications(ISpecification<Tkey, TEntity> spec)
+        {
+            return  SpecificationsEvaluator.GetQuery(_context.Set<TEntity>(), spec);
         }
     }
 }

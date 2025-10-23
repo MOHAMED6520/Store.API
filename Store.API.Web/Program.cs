@@ -30,17 +30,11 @@ namespace Store.API.Web
             });
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddAutoMapper(p => p.AddProfile(new ProductProfile()));
+            builder.Services.AddAutoMapper(p => p.AddProfile(new ProductProfile(builder.Configuration)));
             builder.Services.AddScoped<IServiceManger, ServiceManger>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
             #region Initialize Db
 
             var Scope = app.Services.CreateScope();
@@ -50,7 +44,15 @@ namespace Store.API.Web
             await dbInitializer.IntializeAsync();
 
             #endregion
+            app.UseStaticFiles();
 
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+            
 
             app.UseHttpsRedirection();
 
