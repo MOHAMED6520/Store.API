@@ -10,9 +10,13 @@ namespace Store.API.Domain.Contracts
 {
     public interface ISpecification<Tkey,TEntity> where TEntity : BaseEntity<Tkey>
     {
-        public List<Expression<Func<TEntity,object>>> Includes { get; set; }
-        public Expression<Func<TEntity,bool>>? Criteria { get; set; }
-        public Expression<Func<TEntity,object>>? OrderBy { get; set; }
-        public Expression<Func<TEntity,object>>? OrderByDescending { get; set; }
+         List<Expression<Func<TEntity,object>>> Includes { get; set; }
+         Expression<Func<TEntity,bool>>? Criteria { get; set; }
+
+         Expression<Func<TEntity,object>>? OrderBy { get; set; }
+         Expression<Func<TEntity,object>>? OrderByDescending { get; set; }
+         int Take { get; set; }
+         int Skip { get; set; }
+         bool IsPagination { get; set; }
     }
 }

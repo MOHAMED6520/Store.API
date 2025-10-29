@@ -1,4 +1,5 @@
-﻿using Store.API.Shared.Dtos.Products;
+﻿using Store.API.Shared;
+using Store.API.Shared.Dtos.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Store.API.Services.Abstractions.Products
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductResponce>> GetAllProductAsync(int? brand,int? Type , string? Sort,string? Search);
+        Task<PaginationResponse<ProductResponce>> GetAllProductAsync(ProductQueryParameters parameters);
         Task<ProductResponce> GetProductByIdAsync(int id);
         Task<IEnumerable<BrandTypeResponse>> GetAllBrandsAsync();
         Task<IEnumerable<BrandTypeResponse>> GetAllTypesAsync();
