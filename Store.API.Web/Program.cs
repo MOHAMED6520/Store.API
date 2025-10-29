@@ -1,12 +1,16 @@
 
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Store.API.Domain.Contracts;
 using Store.API.Persistence;
 using Store.API.Persistence.Data.Contexts;
 using Store.API.Services;
 using Store.API.Services.Abstractions;
 using Store.API.Services.Mapping;
+using Store.API.Shared.ErrorsModels;
+using Store.API.Web.Middlewares;
 using System.Threading.Tasks;
 
 namespace Store.API.Web
@@ -32,6 +36,26 @@ namespace Store.API.Web
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddAutoMapper(p => p.AddProfile(new ProductProfile(builder.Configuration)));
             builder.Services.AddScoped<IServiceManger, ServiceManger>();
+            builder.Services.Configure<ApiBehaviorOptions>(config => 
+            {
+
+                
+                config.InvalidModelStateResponseFactory = (ActionContext) =>
+                {
+                   var error = ActionContext.ModelState.Where(a => a.Value.Errors.Any())
+                                 .Select(m=> new ValidationError
+                                 {
+                                     Field = m.Key,
+                                     Errors =m.Value.Errors.Select(m=>m.ErrorMessage)
+                                 });
+                    var responce = new ValidationErrorResponce() 
+                    {
+                    Errors = error
+                    };
+
+                    return new BadRequestObjectResult(responce);
+                };
+            });
 
             var app = builder.Build();
 
@@ -44,6 +68,9 @@ namespace Store.API.Web
             await dbInitializer.IntializeAsync();
 
             #endregion
+
+            app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+
             app.UseStaticFiles();
 
             // Configure the HTTP request pipeline.

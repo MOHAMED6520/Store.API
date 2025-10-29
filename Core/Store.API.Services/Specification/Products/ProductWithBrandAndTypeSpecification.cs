@@ -1,5 +1,6 @@
 ﻿using Store.API.Domain.Contracts;
 using Store.API.Domain.Entities.Products;
+using Store.API.Shared.Dtos.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +12,17 @@ namespace Store.API.Services.Specification.Products
 {
     public class ProductWithBrandAndTypeSpecification :BaseSpecification<int,Product>
     {
-        public ProductWithBrandAndTypeSpecification(int?brandId,int? TypeId,string?Sort,string?Search):base
+        public ProductWithBrandAndTypeSpecification(ProductQueryParameters parameters) :base
             (
             p =>
                  (
-                 (!brandId.HasValue || p.BrandId == brandId)
+                 (!parameters.BrandId.HasValue || p.BrandId == parameters.BrandId)
                   &&   
-                 (!TypeId.HasValue || p.TypeId==TypeId)
+                 (!parameters.TypeId.HasValue || p.TypeId== parameters.TypeId)
                  )
                  &&
                  (
-                  (string.IsNullOrEmpty(Search)||p.Name.ToLower().Contains(Search.ToLower()))
+                  (string.IsNullOrEmpty(parameters.Search)||p.Name.ToLower().Contains(parameters.Search.ToLower()))
                  )
                 
                   
@@ -31,9 +32,9 @@ namespace Store.API.Services.Specification.Products
         {
             ApplyIncludes();
 
-            if (!string.IsNullOrEmpty(Sort))
+            if (!string.IsNullOrEmpty(parameters.Sort))
             {
-                switch (Sort.ToLower())
+                switch (parameters.Sort.ToLower())
                 {
                     case "priceasc":
                         AddOrderBy(P => P.Price);
@@ -50,6 +51,7 @@ namespace Store.API.Services.Specification.Products
             {
                 AddOrderBy(P => P.Name);
             }
+            ApplyPagination(parameters.PageIndex, parameters.PageSize);
         }
 
         public ProductWithBrandAndTypeSpecification(int id) : base(p=>p.Id==id)

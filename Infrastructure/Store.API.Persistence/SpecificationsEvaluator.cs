@@ -31,6 +31,12 @@ namespace Store.API.Persistence
                 query = query.OrderByDescending(spec.OrderByDescending);
             }
 
+            if(spec.IsPagination)
+            {
+                query = query.Skip(spec.Skip);
+                query = query.Take(spec.Take);
+            }
+             
            
             return query;
         }

@@ -20,11 +20,21 @@ namespace Store.API.Services.Specification
         public Expression<Func<TEntity, object>>? OrderByDescending { get ; set; }
         public Expression<Func<TEntity, object>>? OrderBy { get ; set; }
 
+        public int Take { get ; set ; }
+        public int Skip { get ; set ; }
+        public bool IsPagination { get; set; }
+
         public void AddOrderBy(Expression<Func<TEntity, object>> _Order)
         {
             OrderBy = _Order;
         }
 
+        public void ApplyPagination(int PageIndex,int PageSize)
+        {
+            IsPagination = true;
+            Skip = (PageIndex - 1) * PageSize;
+            Take = PageSize;
+        }
         public void AddOrderByDescending(Expression<Func<TEntity, object>> _OrderDes)
         {
             OrderByDescending = _OrderDes;

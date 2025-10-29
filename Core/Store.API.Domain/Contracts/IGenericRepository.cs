@@ -11,6 +11,7 @@ namespace Store.API.Domain.Contracts
     {
         Task<IEnumerable<TEntity>> GetAllAsync(bool changeTracker = false);
         Task<IEnumerable<TEntity>> GetAllAsync(ISpecification<TKey,TEntity> spec,bool changeTracker = false);
+        Task<IEnumerable<TEntity>> CountAsync (ISpecification<TKey,TEntity> spec,bool changeTracker = false);
         Task<TEntity?> GetAsync(TKey key);
         Task<TEntity?> GetAsync(ISpecification<TKey, TEntity> spec);
         Task AddAsynk(TEntity entity);
