@@ -3,9 +3,12 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using Store.API.Domain.Contracts;
 using Store.API.Persistence;
 using Store.API.Persistence.Data.Contexts;
+using Store.API.Persistence.Repositories;
 using Store.API.Services;
 using Store.API.Services.Abstractions;
 using Store.API.Services.Mapping;
@@ -32,9 +35,19 @@ namespace Store.API.Web
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
+            {
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")!);
+            });
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddAutoMapper(p => p.AddProfile(new ProductProfile(builder.Configuration)));
+            builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+            builder.Services.AddAutoMapper(p=>
+            {
+                p.AddProfile(new ProductProfile(builder.Configuration));
+                p.AddProfile(new BasketProfile());
+            });
+            //builder.Services.AddAutoMapper(p => p.AddProfile(new BasketProfile(builder.Configuration)));
             builder.Services.AddScoped<IServiceManger, ServiceManger>();
             builder.Services.Configure<ApiBehaviorOptions>(config => 
             {

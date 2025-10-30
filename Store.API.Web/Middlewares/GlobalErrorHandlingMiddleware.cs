@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Store.API.Domain.Exceptions.NotFoundExceptions;
 using Store.API.Shared.ErrorsModels;
 
@@ -46,7 +47,8 @@ namespace Store.API.Web.Middlewares
 
                 response.StatusCode = ex switch
                 {
-                    ProductNotFoundException => StatusCodes.Status404NotFound,
+                    NotFoundException => StatusCodes.Status404NotFound,
+                    BadHttpRequestException => StatusCodes.Status400BadRequest,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 context.Response.StatusCode = response.StatusCode;

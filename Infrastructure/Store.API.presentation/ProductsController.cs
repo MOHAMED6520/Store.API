@@ -16,7 +16,7 @@ namespace Store.API.presentation
         [HttpGet]
         public async Task<IActionResult> GetAllProducts ([FromQuery]ProductQueryParameters parameters)
         {
-            var products =await _serviceManger.productService.GetAllProductAsync(parameters);
+            var products =await _serviceManger.ProductService.GetAllProductAsync(parameters);
             if (products is null) return BadRequest();
 
             return Ok(products);
@@ -28,7 +28,7 @@ namespace Store.API.presentation
         public async Task<IActionResult> GetProductById(int? id)
         {
             if (id is null) return BadRequest();
-            var products =await _serviceManger.productService.GetProductByIdAsync(id.Value);
+            var products =await _serviceManger.ProductService.GetProductByIdAsync(id.Value);
             if (products is null) return NotFound();
 
             return Ok(products);
@@ -40,7 +40,7 @@ namespace Store.API.presentation
         [Route("Brands")]
         public async Task<IActionResult> GetAllBrands()
         {
-            var Brands =await _serviceManger.productService.GetAllBrandsAsync();
+            var Brands =await _serviceManger.ProductService.GetAllBrandsAsync();
             if (Brands is null) return NotFound();
             return Ok(Brands);
         }
@@ -51,7 +51,7 @@ namespace Store.API.presentation
         [Route("Types")]
         public async Task<IActionResult> GetAllTypes()
         {
-            var Types =await _serviceManger.productService.GetAllTypesAsync();
+            var Types =await _serviceManger.ProductService.GetAllTypesAsync();
             if (Types is null) return NotFound();
             return Ok(Types);
         }
