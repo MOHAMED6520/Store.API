@@ -11,10 +11,12 @@ namespace Store.API.Web.Middlewares
         private readonly ILogger<GlobalErrorHandlingMiddleware> _logger;
 
         public GlobalErrorHandlingMiddleware(RequestDelegate next , ILogger<GlobalErrorHandlingMiddleware> logger)
+
         {
             _next= next ;
             _logger = logger;
         }
+
         public async Task InvokeAsync(HttpContext context)
         {
             try 
@@ -23,38 +25,48 @@ namespace Store.API.Web.Middlewares
 
                 if(context.Response.StatusCode==StatusCodes.Status404NotFound)
                 {
-                    context.Response.StatusCode = StatusCodes.Status404NotFound;
-                    context.Response.ContentType = "application/json";
-                    var response = new ErrorDetails()
-                    {
-                        ErrorMessage = $"End Point {context.Request.Path} Is Not Found",
-                        StatusCode= StatusCodes.Status404NotFound
-                    };
-                    await context.Response.WriteAsJsonAsync(response);
+                    await HandlingNotFoundEndPointAsync(context);
                 }
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-
-                //context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                context.Response.ContentType = "application/json";
-
-                var response = new ErrorDetails()
-                {
-                    ErrorMessage = ex.Message
-                };
-
-                response.StatusCode = ex switch
-                {
-                    NotFoundException => StatusCodes.Status404NotFound,
-                    BadHttpRequestException => StatusCodes.Status400BadRequest,
-                    _ => StatusCodes.Status500InternalServerError
-                };
-                context.Response.StatusCode = response.StatusCode;
-                await context.Response.WriteAsJsonAsync(response);
+                await HandlingErrorAsync(context, ex);
             }
-            
+
+        }
+
+        private static async Task HandlingErrorAsync(HttpContext context, Exception ex)
+        {
+
+            //context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+
+            var response = new ErrorDetails()
+            {
+                ErrorMessage = ex.Message
+            };
+
+            response.StatusCode = ex switch
+            {
+                NotFoundException => StatusCodes.Status404NotFound,
+                BadHttpRequestException => StatusCodes.Status400BadRequest,
+                _ => StatusCodes.Status500InternalServerError
+            };
+            context.Response.StatusCode = response.StatusCode;
+            await context.Response.WriteAsJsonAsync(response);
+        }
+
+        private static async Task HandlingNotFoundEndPointAsync(HttpContext context)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            context.Response.ContentType = "application/json";
+            var response = new ErrorDetails()
+            {
+                ErrorMessage = $"End Point {context.Request.Path} Is Not Found",
+                StatusCode = StatusCodes.Status404NotFound
+            };
+            await context.Response.WriteAsJsonAsync(response);
         }
     }
 }
