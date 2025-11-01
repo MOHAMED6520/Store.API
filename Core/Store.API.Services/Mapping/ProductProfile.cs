@@ -12,11 +12,11 @@ namespace Store.API.Services.Mapping
 {
     public class ProductProfile:Profile
     {
-        public ProductProfile(IConfiguration _configuration)
+        public ProductProfile()
         {
             CreateMap<Product, ProductResponce>().ForMember(B => B.Brand, O => O.MapFrom(N => N.Brand.Name))
                                                  .ForMember(B => B.Type, O => O.MapFrom(N => N.Type.Name))
-                                                 .ForMember(B => B.PictureUrl, O => O.MapFrom(new ProductPictureUrlResolver(_configuration)));
+                                                 .ForMember(B => B.PictureUrl,  O => O.MapFrom<ProductPictureUrlResolver>());
 
 
             CreateMap<ProductBrand, BrandTypeResponse>();
