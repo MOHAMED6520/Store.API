@@ -14,10 +14,13 @@ namespace Store.API.Services
 {
     public class ServiceManger(IMapper mapper 
         , IUnitOfWork unitOfWork,
-        IBasketRepository basketRepository) : IServiceManger
+        IBasketRepository basketRepository,
+        ICacheRepository _cacheRepository
+        ) : IServiceManger
     {
         public IProductService ProductService { get; } = new ProductService(unitOfWork, mapper);
 
         public IBasketService BasketService { get; } = new BasketServices(basketRepository, mapper);
+        public ICasheService CasheService { get; } = new CasheService(_cacheRepository);
     }
 }

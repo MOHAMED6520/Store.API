@@ -15,7 +15,7 @@ namespace Store.API.Persistence.Repositories
         public async Task<string?> GetAsync(string key)
         {
             var result =await _database.StringGetAsync(key);
-            return result.IsNullOrEmpty ? result : default;
+            return !result.IsNullOrEmpty ? result : default;
         }
 
         public async Task SetAsync(string key, object value, TimeSpan duration)
