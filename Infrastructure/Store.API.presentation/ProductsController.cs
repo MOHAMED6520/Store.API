@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Store.API.presentation.Attributes;
 using Store.API.Services.Abstractions;
 using Store.API.Shared.Dtos.Products;
 using System;
@@ -14,6 +15,7 @@ namespace Store.API.presentation
     public class ProductsController(IServiceManger _serviceManger) :ControllerBase
     {
         [HttpGet]
+        [Cashe(100)]
         public async Task<IActionResult> GetAllProducts ([FromQuery]ProductQueryParameters parameters)
         {
             var products =await _serviceManger.ProductService.GetAllProductAsync(parameters);
