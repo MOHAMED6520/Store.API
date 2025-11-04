@@ -3,7 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Store.API.Domain.Contracts;
+using Store.API.Domain.Models.Identity;
 using Store.API.Persistence.Data.Contexts;
+using Store.API.Persistence.Identity;
 using Store.API.Persistence.Repositories;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,10 @@ namespace Store.API.Persistence
             services.AddDbContext<StoreDbContext>(options =>
             {
                 options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
+            });
+            services.AddDbContext<StoreIdentityDbContext>(options =>
+            {
+                options.UseSqlServer(_configuration.GetConnectionString("IdentityConnection"));
             });
             services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Store.API.Domain.Exceptions.NotFoundExceptions;
+using Store.API.Domain.Exceptions.UnAuthorizedException;
+using Store.API.Domain.Exceptions.ValidationException;
 using Store.API.Shared.ErrorsModels;
 
 namespace Store.API.Web.Middlewares
@@ -51,6 +53,8 @@ namespace Store.API.Web.Middlewares
             {
                 NotFoundException => StatusCodes.Status404NotFound,
                 BadHttpRequestException => StatusCodes.Status400BadRequest,
+                UnAuthorizedException => StatusCodes.Status401Unauthorized,
+                ValidationException => HandlingValidationEndPointAsync((ValidationException)ex,response),
                 _ => StatusCodes.Status500InternalServerError
             };
             context.Response.StatusCode = response.StatusCode;
@@ -67,6 +71,12 @@ namespace Store.API.Web.Middlewares
                 StatusCode = StatusCodes.Status404NotFound
             };
             await context.Response.WriteAsJsonAsync(response);
+        }
+        private static int HandlingValidationEndPointAsync(ValidationException ex,ErrorDetails responce)
+        {
+            responce.Errors = ex.errors;
+            return StatusCodes.Status400BadRequest;
+
         }
     }
 }

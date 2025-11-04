@@ -1,9 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Store.API.Domain.Contracts;
+using Store.API.Domain.Models.Identity;
 using Store.API.Persistence;
+using Store.API.Persistence.Identity;
 using Store.API.Services;
+using Store.API.Shared;
 using Store.API.Shared.ErrorsModels;
 using Store.API.Web.Middlewares;
+using System.Text;
 
 namespace Store.API.Web.Extensions
 {
@@ -15,13 +22,15 @@ namespace Store.API.Web.Extensions
 
             services.AddSwaggerGenServices();
 
+            services.ConfigureServices();
+
             services.AddInfrastructureServices(_configuration);
 
-            services.AddApplicationServices();
+            services.AddIdentityServices();
 
-            services.ConfiguratinsServices();
+            services.AddApplicationServices(_configuration);
 
-
+            services.ConfigureJwtServices(_configuration);
 
             return services;
         }
@@ -30,13 +39,47 @@ namespace Store.API.Web.Extensions
             services.AddControllers();
             return services;
         }
+
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser,IdentityRole>().AddEntityFrameworkStores<StoreIdentityDbContext>();
+            return services;
+        }
+
+        private static IServiceCollection ConfigureJwtServices(this IServiceCollection services , IConfiguration _configuration)
+        {
+            var JwtOption = _configuration.GetSection("JwtOption").Get<JwtOptions>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options => 
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+
+
+                    ValidIssuer = JwtOption.Issuer,
+                    ValidAudience = JwtOption.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtOption.SecretKey)),
+                };
+            });
+            return services;
+        }
+
         private static IServiceCollection AddSwaggerGenServices(this IServiceCollection services)
         {
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             return services;
         }
-        private static IServiceCollection ConfiguratinsServices(this IServiceCollection services)
+        private static IServiceCollection ConfigureServices(this IServiceCollection services)
         {
             services.Configure<ApiBehaviorOptions>(config =>
             {
@@ -80,6 +123,7 @@ namespace Store.API.Web.Extensions
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 
@@ -91,6 +135,9 @@ namespace Store.API.Web.Extensions
             var Scope = app.Services.CreateScope();
             var dbInitializer = Scope.ServiceProvider.GetRequiredService<IDbInitializer>();
             await dbInitializer.IntializeAsync();
+
+            await dbInitializer.IntializeIdentityAsync();
+            
             return app;
         }
         private static WebApplication GlobalErrorHandling(this WebApplication app)
