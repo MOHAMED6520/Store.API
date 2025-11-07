@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Store.API.Services.Mapping
+namespace Store.API.Services.Mapping.Products
 {
     public class ProductProfile:Profile
     {

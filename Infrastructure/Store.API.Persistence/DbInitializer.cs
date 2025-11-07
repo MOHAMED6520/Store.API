@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Store.API.Domain.Contracts;
 using Store.API.Domain.Entities.Products;
 using Store.API.Domain.Models.Identity;
+using Store.API.Domain.Models.Orders;
 using Store.API.Persistence.Data.Contexts;
 using Store.API.Persistence.Identity;
 using System;
@@ -134,6 +135,25 @@ namespace Store.API.Persistence
                await _userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
                await _userManager.AddToRoleAsync(admin, "Admin");
             }
+
+            if (!await _context.deliveryMethods.AnyAsync())
+            {
+                //Read All Data From Json File
+                var deliveriesData = await File.ReadAllTextAsync(@"..\Infrastructure\Store.API.Persistence\Data\Dataseding\delivery.json");
+
+                // converte the json string to list<Delivery>
+                var delivery = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveriesData);
+
+                //Cheak if file exist and have data
+                //Add All Data To Delivery table
+                if (delivery is not null && delivery.Count > 0)
+                {
+                    await _context.AddRangeAsync(delivery);
+                }
+
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }
+

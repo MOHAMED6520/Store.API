@@ -12,7 +12,7 @@ namespace Store.API.presentation
 {
     [ApiController]
     [Route("api/[Controller]")]
-    public class AccountController(IServiceManger _serviceManger) :ControllerBase
+    public class AuthController(IServiceManger _serviceManger) :ControllerBase
     {
         [HttpPost]
         [Route("Login")]

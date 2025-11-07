@@ -7,8 +7,10 @@ using Store.API.Domain.Models.Identity;
 using Store.API.Services.Abstractions;
 using Store.API.Services.Abstractions.AuthServices;
 using Store.API.Services.Abstractions.Basket;
+using Store.API.Services.Abstractions.Orders;
 using Store.API.Services.Abstractions.Products;
 using Store.API.Services.AuthServices;
+using Store.API.Services.Orders;
 using Store.API.Services.Products;
 using Store.API.Shared;
 using System;
@@ -19,20 +21,23 @@ using System.Threading.Tasks;
 
 namespace Store.API.Services
 {
-    public class ServiceManger(IMapper mapper 
-        , IUnitOfWork unitOfWork,
-        IBasketRepository basketRepository,
+    public class ServiceManger(IMapper _mapper 
+        , IUnitOfWork _unitOfWork,
+        IBasketRepository _basketRepository,
         ICacheRepository _cacheRepository,
-        UserManager<AppUser> user,
-        IOptions<JwtOptions> Options
+        UserManager<AppUser> _user,
+        IOptions<JwtOptions> _Options
 
         ) : IServiceManger
     {
-        public IProductService ProductService { get; } = new ProductService(unitOfWork, mapper);
+        public IProductService ProductService { get; } = new ProductService(_unitOfWork, _mapper);
 
-        public IBasketService BasketService { get; } = new BasketServices(basketRepository, mapper);
+        public IBasketService BasketService { get; } = new BasketServices(_basketRepository, _mapper);
         public ICasheService CasheService { get; } = new CasheService(_cacheRepository);
 
-        public IAuthService AuthService { get; } =new AuthService(user, Options);
+        public IAuthService AuthService { get; } =new AuthService(_user, _Options);
+        public IOrderService orderService { get; } =new OrderService(_unitOfWork,_mapper,_basketRepository);
+
+        
     }
 }
