@@ -1,0 +1,9 @@
+﻿namespace Store.API.Domain.Models.Orders
+{
+    public enum OrderStatus
+    {
+        Pending=0,
+        PaymentSuccess=1,
+        PaymentFailure=2,
+    }
+}
